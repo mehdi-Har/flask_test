@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from services.user_service import PatientService
-from models.user import Patient
+from services.patient_service import PatientService
+from models.patient import Patient
 
-patients_bp = Blueprint("patients", __name__)  # Correction: __name__ au lieu de **name**
+patients_bp = Blueprint("patients", __name__)
 patient_service = PatientService()
 
 @patients_bp.route("/", methods=["POST"])
@@ -10,6 +10,7 @@ def create_patient():
     try:
         data = request.json
         required = ["cin", "nom", "email", "telephone"]
+        
         if not all(k in data for k in required):
             return jsonify({"error": "Champs requis manquants"}), 400
         
@@ -21,7 +22,10 @@ def create_patient():
         )
         
         result = patient_service.create(patient)
-        return jsonify({"message" if result["status"] < 400 else "error": result.get("message", result.get("error"))}), result["status"]
+        return jsonify({
+            "message" if result["status"] < 400 else "error": result.get("message", result.get("error"))
+        }), result["status"]
+    
     except Exception as e:
         return jsonify({"error": f"Erreur serveur: {str(e)}"}), 500
 
@@ -48,7 +52,9 @@ def update_patient(cin):
     try:
         data = request.json
         result = patient_service.update(cin, data)
-        return jsonify({"message" if result["status"] < 400 else "error": result.get("message", result.get("error"))}), result["status"]
+        return jsonify({
+            "message" if result["status"] < 400 else "error": result.get("message", result.get("error"))
+        }), result["status"]
     except Exception as e:
         return jsonify({"error": f"Erreur serveur: {str(e)}"}), 500
 
@@ -56,6 +62,8 @@ def update_patient(cin):
 def delete_patient(cin):
     try:
         result = patient_service.delete(cin)
-        return jsonify({"message" if result["status"] < 400 else "error": result.get("message", result.get("error"))}), result["status"]
+        return jsonify({
+            "message" if result["status"] < 400 else "error": result.get("message", result.get("error"))
+        }), result["status"]
     except Exception as e:
         return jsonify({"error": f"Erreur serveur: {str(e)}"}), 500
